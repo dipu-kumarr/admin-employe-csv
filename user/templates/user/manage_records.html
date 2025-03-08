@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Manage Employee Records</title>
+</head>
+<body>
+    <h2>Manage Employee Records</h2>
+    <table border="1">
+        <tr>
+            <th>Employee</th>
+            <th>Name</th>
+            <th>Title</th>
+            <th>Action</th>
+        </tr>
+        {% for record in records %}
+        <tr>
+            <td>{{ record.employee.username }}</td>
+            <td>{{ record.name }}</td>
+            <td>{{ record.title }}</td>
+            <td>
+                <a href="{% url 'mark_complete' record.id %}">Mark Complete</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    <a href="{% url 'dashboard' %}">Back to Dashboard</a>
+</body>
+</html>
