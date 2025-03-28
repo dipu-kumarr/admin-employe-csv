@@ -8,9 +8,31 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.contrib import messages
 import csv
+from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate
+from django.contrib import messages
 
 from .models import CustomUser, Record
-from .forms import CSVUploadForm
+from .forms import CSVUploadForm, CustomUserCreationForm
+
+
+def signup(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        role = request.POST['role']
+        password = request.POST['password']
+        confirm_password = request.POST['confirm_password']
+
+        if password != confirm_password:
+            messages.error(request, "Passwords do not match! Please try again.")
+            return redirect('signup')
+
+        # Create user account
+        user = CustomUser.objects.create_user(username=username, password=password, role=role)
+        messages.success(request, "Signup completed successfully! You can now log in.")
+        return redirect('login')
+
+    return render(request, 'user/signup.html')
 
 
 def login_view(request):
