@@ -20,6 +20,7 @@ def signup(request):
     if request.method == 'POST':
         username = request.POST['username']
         role = request.POST['role']
+        email = request.POST['email']
         password = request.POST['password']
         confirm_password = request.POST['confirm_password']
 
@@ -28,7 +29,7 @@ def signup(request):
             return redirect('signup')
 
         # Create user account
-        user = CustomUser.objects.create_user(username=username, password=password, role=role)
+        user = CustomUser.objects.create_user(username=username, password=password, role=role, email=email)
         messages.success(request, "Signup completed successfully! You can now log in.")
         return redirect('login')
 
