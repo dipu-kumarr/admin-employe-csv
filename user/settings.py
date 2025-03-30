@@ -78,12 +78,12 @@ WSGI_APPLICATION = 'app.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'app',
-        'USER' : 'root',
-        'PASSWORD':'Deep@9852',
-        'HOST' : 'localhost',    
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': os.environ["PGDATABASE"],
+        'USER': os.environ["PGUSER"],
+        'PASSWORD': os.environ["PGPASSWORD"],
+        'HOST': os.environ["PGHOST"],
+        'PORT': os.environ["PGPORT"],
     }
 }
 
