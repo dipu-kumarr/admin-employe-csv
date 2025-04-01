@@ -26,7 +26,7 @@ DATABASES = {
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-CSRF_TRUSTED_ORIGINS= ["https://django-server-production-b3b7.up.railway.app"]
+CSRF_TRUSTED_ORIGINS= ["https://django-server-production-2137.up.railway.app"]
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -38,7 +38,7 @@ SECRET_KEY = 'django-insecure-ei9kh#-qsz%$gd)=a3t34)zlww0=s3d-fpe(4d9jgc*zb(qu6b
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'django-server-production-b3b7.up.railway.app']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'django-server-production-2137.up.railway.app']
 
 INTERNAL_IPS = (
     '127.0.0.1',
