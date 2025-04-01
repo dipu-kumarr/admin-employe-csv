@@ -12,12 +12,17 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
-# import dj_database_url
-# from environ import Env
+import dj_database_url
+from dotenv import load_dotenv
 
-# env = Env()
-# Env.read_env()
-# ENVIRONMENT = env('ENVIRONMENT', default='production')
+load_dotenv()  # Load .env file
+
+DATABASES = {
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL'),
+        conn_max_age=600,
+    )
+}
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -100,16 +105,25 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # }
 
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'railway',  # Database name
+#         'USER': 'root',  # MySQL username
+#         'PASSWORD': 'IUwOvtrnDFWGejbBwYTOgDfoLweDHuVB',  # MySQL password
+#         'HOST': 'caboose.proxy.rlwy.net',  # MySQL host
+#         'PORT': '52255',  # MySQL port
+#     }
+# }
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'railway',  # Database name
-        'USER': 'root',  # MySQL username
-        'PASSWORD': 'IUwOvtrnDFWGejbBwYTOgDfoLweDHuVB',  # MySQL password
-        'HOST': 'caboose.proxy.rlwy.net',  # MySQL host
-        'PORT': '52255',  # MySQL port
-    }
+    'default': dj_database_url.config(
+        default=os.getenv('DATABASE_URL', 'postgresql://postgres:LaWcbqoFEiwBuPSXtQkvkKiBTMMqmQPJ@crossover.proxy.rlwy.net:49367/railway'),
+        conn_max_age=600,  # Keeps connections open for performance
+    )
 }
+
+
 
 
 # POSTGRES_LOCALLY = True
