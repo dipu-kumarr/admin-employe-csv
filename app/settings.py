@@ -12,6 +12,12 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
+import dj_database_url
+from environ import Env
+
+# env = Env()
+# Env.read_env()
+# ENVIRONMENT = env('ENVIRONMENT', default='production')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,9 +30,15 @@ CSRF_TRUSTED_ORIGINS= ["https://django-server-production-b3b7.up.railway.app"]
 SECRET_KEY = 'django-insecure-ei9kh#-qsz%$gd)=a3t34)zlww0=s3d-fpe(4d9jgc*zb(qu6b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['localhost', '127.0.1', 'django-server-production-b3b7.up.railway.app']
+
+INTERNAL_IPS = (
+    '127.0.0.1',
+    'localhost',
+)
 
 
 # Application definition
@@ -76,17 +88,33 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'railway',
+#         'USER': config('PGUSER'),
+#         'PASSWORD': config("PGPASSWORD"),
+#         'HOST': config("PGHOST"),
+#         'PORT': config("PGPORT"),
+#     }
+# }
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'railway',
-        'USER': config('PGUSER'),
-        'PASSWORD': config("PGPASSWORD"),
-        'HOST': config("PGHOST"),
-        'PORT': config("PGPORT"),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'railway',  # Database name
+        'USER': 'root',  # MySQL username
+        'PASSWORD': 'IUwOvtrnDFWGejbBwYTOgDfoLweDHuVB',  # MySQL password
+        'HOST': 'caboose.proxy.rlwy.net',  # MySQL host
+        'PORT': '52255',  # MySQL port
     }
 }
 
+
+# POSTGRES_LOCALLY = True
+# if ENVIRONMENT == 'production' or POSTGRES_LOCALLY == True:
+#     DATABASES['default'] = dj_database_url.parse(env('DATABASE_URL'))
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
