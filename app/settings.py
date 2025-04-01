@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from pathlib import Path
 from decouple import config
-import dj_database_url
-from environ import Env
+# import dj_database_url
+# from environ import Env
 
 # env = Env()
 # Env.read_env()
