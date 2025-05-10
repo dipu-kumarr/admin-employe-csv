@@ -22,22 +22,19 @@ from .forms import CSVUploadForm, CustomUserCreationForm
 
 def signup(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        role = request.POST['role']
-        email = request.POST['email']
-        password = request.POST['password']
-        confirm_password = request.POST['confirm_password']
-
-        if password != confirm_password:
-            messages.error(request, "Passwords do not match! Please try again.")
-            return redirect('signup')
-
-        # Create user account
-        user = CustomUser.objects.create_user(username=username, password=password, role=role, email=email)
-        messages.success(request, "Signup completed successfully! You can now log in.")
-        return redirect('login')
-
-    return render(request, 'user/signup.html')
+        form = CustomUserCreationForm(request.POST, user=request.user)
+        if form.is_valid():
+            # Extra backend check: only admin can assign admin role
+            role = form.cleaned_data['role']
+            if role == 'admin' and not (request.user.is_authenticated and request.user.role == 'admin'):
+                form.add_error('role', 'Only admins can assign the admin role.')
+            else:
+                form.save()
+                messages.success(request, "Signup completed successfully! You can now log in.")
+                return redirect('login')
+    else:
+        form = CustomUserCreationForm(user=request.user)
+    return render(request, 'user/signup.html', {'form': form})
 
 
 def login_view(request):
