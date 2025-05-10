@@ -5,12 +5,16 @@ from django.core.files.storage import FileSystemStorage
 from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.conf import settings
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.contrib import messages
 import csv
+import json
+from django.db.models import Count
 from django.contrib.auth.models import User
 from django.contrib.auth import login, authenticate
 from django.contrib import messages
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from .models import CustomUser, Record
 from .forms import CSVUploadForm, CustomUserCreationForm
@@ -60,7 +64,10 @@ def login_view(request):
 
 # Logout 
 def logout_view(request):
-    logout(request)
+    # Handle both GET and POST requests for logout
+    if request.user.is_authenticated:
+        logout(request)
+        messages.success(request, "You have been logged out successfully!")
     return redirect('login')
 
 
@@ -179,3 +186,57 @@ def send_email(request, record_id):
         messages.error(request, "❌ Error: Employee does not have an email set.")
 
     return redirect('dashboard') 
+
+
+@login_required
+def statistics(request):
+    """View for displaying record statistics with data visualization"""
+    if request.user.role == 'admin':
+        # Get all records for admins
+        records = Record.objects.all()
+    else:
+        # Get only user's records for employees
+        records = Record.objects.filter(employee=request.user)
+    
+    # Total records count
+    total_records = records.count()
+    
+    # Records created in the last 7 days
+    last_week = timezone.now() - timedelta(days=7)
+    recent_records = records.filter(created_at__gte=last_week).count()
+    
+    # Records by day (last 7 days)
+    days = []
+    record_counts = []
+    
+    for i in range(6, -1, -1):
+        day = timezone.now() - timedelta(days=i)
+        day_start = day.replace(hour=0, minute=0, second=0, microsecond=0)
+        day_end = day.replace(hour=23, minute=59, second=59, microsecond=999999)
+        
+        count = records.filter(created_at__range=(day_start, day_end)).count()
+        days.append(day.strftime('%a'))
+        record_counts.append(count)
+    
+    # If admin, get records count per employee
+    employee_data = []
+    if request.user.role == 'admin':
+        employee_records = Record.objects.values('employee__username').annotate(
+            count=Count('id')
+        ).order_by('-count')[:5]  # Top 5 employees
+        
+        for item in employee_records:
+            employee_data.append({
+                'name': item['employee__username'],
+                'count': item['count']
+            })
+    
+    context = {
+        'total_records': total_records,
+        'recent_records': recent_records,
+        'days': json.dumps(days),
+        'record_counts': json.dumps(record_counts),
+        'employee_data': json.dumps(employee_data),
+    }
+    
+    return render(request, 'user/statistics.html', context) 

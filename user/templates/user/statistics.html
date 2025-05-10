@@ -1,0 +1,505 @@
+{% extends 'user/base.html' %}
+
+{% block title %}Statistics - Valasys Records{% endblock %}
+
+{% block extra_css %}
+<style>
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    margin-bottom: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.stat-header {
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-title {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    color: white;
+    font-size: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-blue {
+    background: linear-gradient(45deg, #4361ee, #3f37c9);
+}
+
+.stat-icon-green {
+    background: linear-gradient(45deg, #4CAF50, #2E7D32);
+}
+
+.stat-body {
+    padding: 25px 20px;
+}
+
+.stat-number {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--dark-color);
+    margin-bottom: 10px;
+    animation: countUp 1.5s ease-out forwards;
+}
+
+@keyframes countUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 1rem;
+}
+
+.chart-container {
+    position: relative;
+    height: 350px;
+    width: 100%;
+    padding: 10px;
+}
+
+.no-data {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    color: #6c757d;
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 10px;
+}
+
+.no-data i {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    opacity: 0.3;
+}
+
+.chart-card {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.chart-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+}
+
+.chart-header {
+    padding: 20px;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+}
+
+.chart-header h5 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.chart-body {
+    padding: 20px;
+    background-color: white;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card animate__animated animate__fadeIn">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-bar me-2 text-primary"></i> Statistics
+                </h2>
+                <p class="text-muted">Analyze your data with visual insights</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Total Records Card -->
+    <div class="col-md-6 animate__animated animate__fadeInLeft">
+        <div class="stat-card">
+            <div class="stat-header">
+                <h5 class="stat-title">Total Records</h5>
+                <div class="stat-icon stat-icon-blue">
+                    <i class="fas fa-database"></i>
+                </div>
+            </div>
+            <div class="stat-body">
+                <div class="stat-number">{{ total_records }}</div>
+                <div class="stat-label">Records in database</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Recent Records Card -->
+    <div class="col-md-6 animate__animated animate__fadeInRight">
+        <div class="stat-card">
+            <div class="stat-header">
+                <h5 class="stat-title">Recent Activity</h5>
+                <div class="stat-icon stat-icon-green">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+            </div>
+            <div class="stat-body">
+                <div class="stat-number">{{ recent_records }}</div>
+                <div class="stat-label">Records added in the last 7 days</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <!-- Records by Day Chart -->
+    <div class="col-md-12 animate__animated animate__fadeInUp animate__delay-1s">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h5><i class="fas fa-chart-line me-2 text-primary"></i>Records Activity (Last 7 Days)</h5>
+            </div>
+            <div class="chart-body">
+                <div class="chart-container">
+                    <canvas id="recordsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if request.user.role == 'admin' %}
+<div class="row mb-4">
+    <!-- Employee Records Chart -->
+    <div class="col-md-12 animate__animated animate__fadeInUp animate__delay-2s">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h5><i class="fas fa-users me-2 text-primary"></i>Top 5 Employees by Records</h5>
+            </div>
+            <div class="chart-body">
+                <div class="chart-container">
+                    {% if employee_data != '[]' %}
+                        <canvas id="employeeChart"></canvas>
+                    {% else %}
+                        <div class="no-data">
+                            <i class="fas fa-users"></i>
+                            <p>No employee data available yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Debugging information - will be hidden in production -->
+<div id="debug-info" style="display: none; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 10px; border: 1px solid #ddd;">
+    <h5>Debug Information</h5>
+    <pre id="debug-data"></pre>
+</div>
+
+<script>
+    // Debug function to show data
+    function showDebugInfo(text) {
+        const debugInfo = document.getElementById('debug-info');
+        const debugData = document.getElementById('debug-data');
+        if (debugInfo && debugData) {
+            debugInfo.style.display = 'block';
+            debugData.textContent = text;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM Content Loaded");
+        
+        // Get the raw data from Django
+        const daysDataRaw = '{{ days|default:"[]"|escapejs }}';
+        const recordCountsDataRaw = '{{ record_counts|default:"[]"|escapejs }}';
+        const employeeDataRaw = '{{ employee_data|default:"[]"|escapejs }}';
+        const userRole = '{{ request.user.role|default:"" }}';
+        
+        // Parse the data
+        let daysData, recordCountsData, employeeData;
+        try {
+            daysData = JSON.parse(daysDataRaw);
+            recordCountsData = JSON.parse(recordCountsDataRaw);
+            employeeData = JSON.parse(employeeDataRaw);
+            console.log("Data parsed successfully");
+            console.log("Days:", daysData);
+            console.log("Record Counts:", recordCountsData);
+            console.log("Employee Data:", employeeData);
+            
+            // Debug info
+            showDebugInfo("Days: " + JSON.stringify(daysData) + "\n" +
+                         "Records: " + JSON.stringify(recordCountsData) + "\n" +
+                         "Employees: " + JSON.stringify(employeeData));
+        } catch (error) {
+            console.error("Error parsing data:", error);
+            showDebugInfo("Error parsing data: " + error + "\n" +
+                         "Days Raw: " + daysDataRaw + "\n" +
+                         "Records Raw: " + recordCountsDataRaw + "\n" +
+                         "Employees Raw: " + employeeDataRaw);
+            
+            // Provide default values
+            daysData = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            recordCountsData = [0, 0, 0, 0, 0, 0, 0];
+            employeeData = [];
+        }
+        
+        // Ensure we have valid data
+        if (!Array.isArray(daysData)) daysData = [];
+        if (!Array.isArray(recordCountsData)) recordCountsData = [];
+        
+        try {
+            // Records by day chart
+            const recordsCanvas = document.getElementById('recordsChart');
+            if (!recordsCanvas) {
+                console.error("Records canvas not found");
+                return;
+            }
+            
+            const recordsCtx = recordsCanvas.getContext('2d');
+            
+            new Chart(recordsCtx, {
+                type: 'line',
+                data: {
+                    labels: daysData,
+                    datasets: [{
+                        label: 'Records Created',
+                        data: recordCountsData,
+                        backgroundColor: 'rgba(67, 97, 238, 0.1)',
+                        borderColor: 'rgba(67, 97, 238, 1)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgba(67, 97, 238, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0,
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: {
+                                    size: 12,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    weight: 'bold'
+                                },
+                                padding: 20
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: false,
+                            titleFont: {
+                                size: 16
+                            },
+                            bodyFont: {
+                                size: 14
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return context.parsed.y + ' Records';
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    animations: {
+                        tension: {
+                            duration: 1000,
+                            easing: 'linear'
+                        }
+                    }
+                }
+            });
+            console.log("Records chart created successfully");
+            
+            // Employee chart (admin only)
+            if (userRole === 'admin' && employeeData && employeeData.length > 0) {
+                try {
+                    const employeeCanvas = document.getElementById('employeeChart');
+                    if (!employeeCanvas) {
+                        console.error("Employee canvas not found");
+                        return;
+                    }
+                    
+                    const employeeCtx = employeeCanvas.getContext('2d');
+                    
+                    const names = employeeData.map(function(item) { return item.name; });
+                    const counts = employeeData.map(function(item) { return item.count; });
+                    
+                    console.log("Employee names:", names);
+                    console.log("Employee counts:", counts);
+                    
+                    new Chart(employeeCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: names,
+                            datasets: [{
+                                label: 'Number of Records',
+                                data: counts,
+                                backgroundColor: [
+                                    'rgba(67, 97, 238, 0.7)',
+                                    'rgba(76, 201, 240, 0.7)',
+                                    'rgba(114, 9, 183, 0.7)',
+                                    'rgba(247, 37, 133, 0.7)',
+                                    'rgba(58, 12, 163, 0.7)'
+                                ],
+                                borderWidth: 1,
+                                borderRadius: 10,
+                                maxBarThickness: 50
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        precision: 0,
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    grid: {
+                                        color: 'rgba(0, 0, 0, 0.05)'
+                                    }
+                                },
+                                x: {
+                                    ticks: {
+                                        font: {
+                                            size: 12,
+                                            weight: 'bold'
+                                        }
+                                    },
+                                    grid: {
+                                        display: false
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                    padding: 12,
+                                    cornerRadius: 8,
+                                    displayColors: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.parsed.y + ' Records';
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                duration: 2000,
+                                easing: 'easeOutQuart'
+                            }
+                        }
+                    });
+                    console.log("Employee chart created successfully");
+                } catch (error) {
+                    console.error("Error creating employee chart:", error);
+                    if (document.getElementById('employeeChart')) {
+                        document.getElementById('employeeChart').parentNode.innerHTML = 
+                            '<div class="no-data">' +
+                            '<i class="fas fa-exclamation-circle"></i>' +
+                            '<p>Error loading employee data: ' + error.message + '</p>' +
+                            '</div>';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Error creating charts:", error);
+            if (document.getElementById('recordsChart')) {
+                document.getElementById('recordsChart').parentNode.innerHTML = 
+                    '<div class="no-data">' +
+                    '<i class="fas fa-exclamation-circle"></i>' +
+                    '<p>Error loading chart data: ' + error.message + '</p>' +
+                    '</div>';
+            }
+        }
+    });
+</script>
+{% endblock %} 
