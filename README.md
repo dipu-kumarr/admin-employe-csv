@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 the key advantages and features of your Codifye Records Management application:
+=======
+the key advantages and features of your Valasys Records Management application:
+>>>>>>> 889ee59883163f1c08923ba6f6fc4edffff4f9da
 Modern, Responsive Design
 Clean, professional UI using Bootstrap 5
 Fully responsive layout that works on all devices

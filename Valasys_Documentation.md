@@ -1,8 +1,16 @@
+<<<<<<< HEAD
 # Codifye Records Management System
 ## Technical Documentation
 
 ### Project Information
 **Project Name:** Codifye Records Management System  
+=======
+# Valasys Records Management System
+## Technical Documentation
+
+### Project Information
+**Project Name:** Valasys Records Management System  
+>>>>>>> 889ee59883163f1c08923ba6f6fc4edffff4f9da
 **Version:** 1.0.0  
 **Last Updated:** May 10, 2025  
 **Development Environment:** Windows 10  
@@ -148,7 +156,11 @@
 
 ### 8.1 Project Structure
 ```
+<<<<<<< HEAD
 Codifye/
+=======
+Valasys/
+>>>>>>> 889ee59883163f1c08923ba6f6fc4edffff4f9da
 ├── app/
 │   ├── settings.py
 │   ├── urls.py
