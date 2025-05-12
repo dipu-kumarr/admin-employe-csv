@@ -1,6 +1,6 @@
 {% extends 'user/base.html' %}
 
-{% block title %}Login - Valasys Records{% endblock %}
+{% block title %}Login - Codifye Records{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -208,12 +208,7 @@
 {% block content %}
 {% if request.user.is_authenticated %}
 <script>
-    let userRole = "{{ request.user.role }}"; 
-    if (userRole === "admin") {
-        window.location.href = "{% url 'dashboard' %}";
-    } else if (userRole === "employee") {
-        window.location.href = "{% url 'upload' %}";
-    }
+    window.location.href = "{% url 'dashboard' %}";
 </script>
 {% endif %}
 
@@ -226,7 +221,7 @@
             <div class="login-logo">
                 <i class="fas fa-list-check"></i>
             </div>
-            <h2 class="login-title animate__animated animate__fadeInUp">Valasys Records</h2>
+            <h2 class="login-title animate__animated animate__fadeInUp">Codifye Records</h2>
             <p class="login-subtitle animate__animated animate__fadeInUp animate__delay-1s">Sign in to your account</p>
         </div>
         

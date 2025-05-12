@@ -1,6 +1,6 @@
 {% extends 'user/base.html' %}
 
-{% block title %}Statistics - Valasys Records{% endblock %}
+{% block title %}Statistics - Codifye Records{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -232,20 +232,24 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <!-- Debugging information - will be hidden in production -->
+{% if request.user.role == 'admin' %}
 <div id="debug-info" style="display: none; margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 10px; border: 1px solid #ddd;">
     <h5>Debug Information</h5>
     <pre id="debug-data"></pre>
 </div>
+{% endif %}
 
 <script>
     // Debug function to show data
     function showDebugInfo(text) {
+        {% if request.user.role == 'admin' %}
         const debugInfo = document.getElementById('debug-info');
         const debugData = document.getElementById('debug-data');
         if (debugInfo && debugData) {
             debugInfo.style.display = 'block';
             debugData.textContent = text;
         }
+        {% endif %}
     }
 
     document.addEventListener('DOMContentLoaded', function() {

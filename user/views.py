@@ -49,12 +49,7 @@ def login_view(request):
 
         if user:
             login(request, user)
-            if user.is_superuser:  
-                return redirect('/admin/')  
-            elif user.role == 'admin':  
-                return redirect('dashboard')  
-            elif user.role == 'employee':
-                return redirect('upload')  
+            return redirect('dashboard')  # Redirect all users to dashboard
         else:
             error_message = "Invalid username or password."
 
